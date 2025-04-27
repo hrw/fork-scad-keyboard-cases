@@ -1,12 +1,12 @@
 $fa=1;
 $fs=5;
-$fs=2;    // Uncomment for final render
+//$fs=2;    // Uncomment for final render
 
 base_height = 13;
 base_chamfer = 2.5;
 wall_thickness = 2.0004;
 
-usb_interconnect = 1; // 0 = keep existing TRRS interconnect hole, 1 = mini-usb interconnect
+usb_interconnect = 0; // 0 = keep existing TRRS interconnect hole, 1 = mini-usb interconnect
 
 tent_positions = [
     // [X, Y, Angle]
@@ -41,15 +41,7 @@ module tent_support(position) {
     }
 }
 
-mini_usb_screw_rad = 2.4 / 2; // Smaller than M3 to tap into
-mini_usb_screw_sep = 20;
-mini_usb_hole_height = 7.5;
-module mini_usb_hole() {
-    translate([0, 0, mini_usb_hole_height/2])  rotate([90, 0, 0]) roundedcube([10, mini_usb_hole_height, 10], r=1.5, center=true, $fs=1);
-    for (i = [-1,1], j = [0, 14]) {
-        translate([i*mini_usb_screw_sep/2, -4-j, -5]) polyhole(r=mini_usb_screw_rad, h=10);
-    }
-}
+
 
 micro_usb_screw_dia = 3.0;
 micro_usb_screw_rad = (micro_usb_screw_dia - 0.6) / 2; // Smaller than M3 to tap into
@@ -119,15 +111,12 @@ module modified_base() {
                 tent_support(tent_positions[i]);
             }
         }
+
         if (usb_interconnect) {
             translate([-28, 61.426, wall_thickness]) mini_usb_hole();
             //translate([65.5, 61.426, wall_thickness]) micro_usb_hole();
         }
-        // Hole to access reset microswitch
-        #translate([40, 55.38, wall_thickness]) {
-            cube([14, 6, 6], center = false);
-            translate([8, 0, 1])  cube([2, 10, 4], center = false);
-        }
+
     }
 }
 

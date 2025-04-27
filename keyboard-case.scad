@@ -3,14 +3,14 @@ unit = 19.05;            // Unit size of spacing between keys
 cherry_plate_width = 14; // Width of hole in plate for key insertion. Adjust if needed
 
 plate_thickness = 4;   // Fairly thick for strength, ideally print this section with high infill
-top_case_raised_height = 7.2 + 1; // Distance between plate and bottom of keycap plus a little extra, for raised top case
+top_case_raised_height = 2.2 + 1; // Distance between plate and bottom of keycap plus a little extra, for raised top case
 bottom_case_height = 13;  // Enough room to house electonics
 wall_thickness = 2;     // Sides and bottom of case
 depth_offset = 0;       // How much of side wall to include below top plate
 
 // Case screw sizes
 standoff_rad = 7 / 2;
-screw_rad = 3.2 / 2;
+screw_rad = 2.5 / 2;
 screw_head_rad = 6 / 2;
 screw_length = 8;
 bottom_screws = false; // Default is to screw down from the top
@@ -106,15 +106,15 @@ module reset_microswitch(hole = true) {
 mini_usb_screw_dia = 3.0;
 mini_usb_screw_rad = (mini_usb_screw_dia - 0.6) / 2; // Smaller than M3 to tap into
 mini_usb_screw_sep = 20;
-mini_usb_hole_height = 7.5;
+mini_usb_hole_height = 5;
 module mini_usb_hole(hole = true) {
-    color("green") translate([0, -11, pcb_thickness/2]) cube([25.5, 19.5, pcb_thickness], center = true);
+  // color("green") translate([0, -11, pcb_thickness/2]) cube([25.5, 19.5, pcb_thickness], center = true);
     if (hole) {
         translate([0, 0, mini_usb_hole_height/2])  rotate([90, 0, 0]) roundedcube([10, mini_usb_hole_height, 10], r=1.5, center=true, $fs=1);
     }
-    color("silver") translate([0, -5, mini_usb_hole_height/2])  rotate([90, 0, 0]) cube([7.6, 3.7, 9.2], center=true, $fs=1);
+//    color("silver") translate([0, -5, mini_usb_hole_height/2])  rotate([90, 0, 0]) cube([7.6, 3.7, 9.2], center=true, $fs=1);
     for (i = [-1,1], j = [0, 14]) {
-        translate([i*mini_usb_screw_sep/2, -4-j, -5]) polyhole(r=mini_usb_screw_rad, h=10);
+  //      translate([i*mini_usb_screw_sep/2, -4-j, -5]) polyhole(r=mini_usb_screw_rad, h=10);
     }
 }
 
@@ -123,19 +123,19 @@ micro_usb_screw_dia = 3.0;
 micro_usb_screw_rad = (micro_usb_screw_dia - 0.6) / 2; // Smaller than M3 to tap into
 micro_usb_screw_sep = 9;
 micro_usb_hole_width = 11;
-micro_usb_hole_height = 7.5;
+micro_usb_hole_height = 5;
 micro_usb_socket_height = 2.5;
-pcb_thickness = 2;
+pcb_thickness = 4;
 module micro_usb_hole(hole = true) {
-    color("green") translate([0, -8, pcb_thickness/2]) cube([14, 14, pcb_thickness], center = true);
+ //   color("green") translate([0, -8, pcb_thickness/2]) cube([14, 14, pcb_thickness], center = true);
     color("silver") {
         if (hole) {
             translate([0, 1, pcb_thickness+micro_usb_socket_height/2]) rotate([90, 0, 0]) roundedcube([micro_usb_hole_width, micro_usb_hole_height, 10], r=1.5, center=true, $fs=1);
         }
-        translate([0, -3, pcb_thickness + micro_usb_socket_height / 2]) rotate([90, 0, 0]) cube([7.5, micro_usb_socket_height, 7], center = true, $fs = 1);
+   //     translate([0, -3, pcb_thickness + micro_usb_socket_height / 2]) rotate([90, 0, 0]) cube([7.5, micro_usb_socket_height, 7], center = true, $fs = 1);
     }
     for (i = [-1,1]) {
-        translate([i * micro_usb_screw_sep/2, -8, -5]) polyhole(r = micro_usb_screw_rad, h = 15);
+    //   translate([i * micro_usb_screw_sep/2, -8, -5]) polyhole(r = micro_usb_screw_rad, h = 15);
     }
 }
 

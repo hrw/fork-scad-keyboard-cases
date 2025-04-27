@@ -64,8 +64,8 @@ r0b_x1 = 0.9;
 r0b_y1 = -3.45;
 r0b_y1b = -13.45;
 r0b_x2 = 146.7;
-r0b_x3 = 169.2;
-r0b_y3 = -75.5;
+r0b_x3 = 180;
+r0b_y3 = -60;
 r0b_x6 = 154.32;
 r0b_y6 = -101.26;
 r0b_x4 = 145.0;
@@ -83,20 +83,24 @@ rev0b_reference_points = [
     ];
 //rev0b_screw_holes = [ for (p = rev0b_reference_points) if (p.x != r0b_x4+5) p];
 rev0b_screw_holes = [
-    //[r0b_x1+5, r0b_y0],           // Bottom left
-    [r0b_x1+26.5, r0b_y0+18.65],           // Bottom left, under caps
 
-    //[r0b_x1+5, r0b_y1-5],       // Top left
-    [r0b_x1+26.5, r0b_y1-6.5],       // Top left
-    //[r0b_x1+44.5, r0b_y1-1],      // Top leftish
+    [r0b_x1+26.5, r0b_y0+18.65], // Bottom left
 
-    //[r0b_x2-13.5, r0b_y1b+3],     // Top right
-    [r0b_x2-6.5,  r0b_y3+40],   // Top right, under caps
+    [r0b_x1+26.5, r0b_y1-6.5],   // Top left
 
-    //[r0b_x2+4.5,  r0b_y3+7],     // Right
+    // obok trrs
+    //[r0b_x2,  r0b_y3+30],   // Top right, under caps
+
+    [r0b_x5-33,  r0b_y3+40],   // Top right, under caps
+    
+    // obok enkodera
+    [r0b_x2+4.5,  r0b_y3+12],     // Right
     [r0b_x6-1.5, r0b_y6+0.9],      // Right, under caps
 
-    //[r0b_x5-35, r0b_y4+20],      // Bottom
+    //[r0b_x5-60, r0b_y4+30],      // Bottom
+    [r0b_x5-33,  r0b_y3-0],   // Top right, under caps
+
+    [r0b_x5, r0b_y4+10],      // Bottom
     ];
 rev0b_tent_positions = [
     // [X, Y, Angle]
@@ -134,23 +138,28 @@ module rev0b_bottom_case() {
         translate([0, 0, wall_thickness + 0.01]) {
             // Case holes for connectors etc. The second version of each is just
             // For preview view
-            translate([34, -8.45, 0.05]) rotate([0, 0, 8.8]) {
-                reset_microswitch();
-                %reset_microswitch(hole = false);
-            }
-            translate([13, -5.5, 0]) rotate([0, 0, 4]) {
+
+            // keyboard cable
+            translate([60, 0, 0]) rotate([0, 0, 4]) {
                 micro_usb_hole();
                 %micro_usb_hole(hole = false);
             }
-            translate([130.5, -7.5, 0]) rotate([0, 0, -24]) {
-                mini_usb_hole();
-                %mini_usb_hole(hole = false);
+            
+            // trrs
+            translate([130, -7.5, 5]) rotate([90, 0, 0]) {
+                 cylinder(h=15, r1=5, r2=5, $fn=30, center=true);
+                //mini_usb_hole();
+                //%mini_usb_hole(hole = false);
             }
         }
     }
 }
 
-part = "assembly";
+
+part = "top0b-raised";
+part = "bottom0b";
+//part = "hrw";
+
 explode = 1;
 if (part == "outer") {
     //BezierVisualize(bzVec);
@@ -177,6 +186,10 @@ if (part == "outer") {
 
 } else if (part == "bottom0b") {
     rev0b_bottom_case();
+
+} else if (part == "hrw") {
+    rev0b_top_case();
+    translate([0, 0, -bottom_case_height -30 * explode]) rev0b_bottom_case();
 
 } else if (part == "assembly") {
     %translate([0, 0, plate_thickness + 30 * explode]) key_holes(left_keys, "keycap");
