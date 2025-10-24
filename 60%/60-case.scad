@@ -1,0 +1,171 @@
+include <60-layout.scad>
+include <../keyboard-case.scad>
+
+$fa = 1;
+$fs = $preview ? 5 : 2;
+bezier_precision = $preview ? 0.05 : 0.025;
+
+// Hacky way to select just the left hand keys from split iris/redox layout
+left_keys = [ for (i = redox_layout) if (key_pos(i).x < 28) i ];
+
+
+/////////////////////////////////////////////////
+// Revised case with bezier based curved outlines
+/////////////////////////////////////////////////
+r0b_x0 = 388.2;
+r0b_y0 = -200;
+r0b_x1 = 0;
+r0b_y1 = 30;
+r0b_y1b = -13.45;
+r0b_x2 = 346.7;
+r0b_x3 = 380;
+r0b_y3 = -60;
+r0b_x6 = 354.32;
+r0b_y6 = -101.26;
+r0b_x4 = 345.0;
+r0b_y4 = -117.6;
+r0b_x5 = 318.65;
+rev0b_reference_points = [
+    [r0b_x0-1, r0b_y0-3],     // Bottom mid
+    [r0b_x1, r0b_y0-5],       // Bottom left
+    [r0b_x1, r0b_y1],         // Top left
+    [r0b_x2, r0b_y1b],        // Top right
+    [r0b_x3+2, r0b_y3-6.5],    // Right
+    [r0b_x6+5, r0b_y6],        // Screw
+    [r0b_x4+5, r0b_y4],        // Bottom
+    [r0b_x5+5, r0b_y4],        // Screw
+    ];
+//rev0b_screw_holes = [ for (p = rev0b_reference_points) if (p.x != r0b_x4+5) p];
+rev0b_screw_holes = [
+
+// from top left, clockwise
+/*
+    // between ` and 1
+    [r0b_x1+26.5, r0b_y1-6.5],
+
+    // between 3 and 4
+    [r0b_x5-33,  r0b_y3+40],
+  
+    // next to encoder
+    [r0b_x2+4.5,  r0b_y3+17],
+
+    // thumb cluster right
+    [r0b_x6-1.5, r0b_y6+0.9],
+
+    // thumb cluster down
+    [r0b_x5, r0b_y4+10],
+
+    // between DFCV
+    [r0b_x5-33,  r0b_y3-0],
+ 
+    // between Ctrl and Z
+    [r0b_x1+26.5, r0b_y0+18.65]
+  */  
+    ];
+rev0b_tent_positions = [
+    // [X, Y, Angle]
+
+    ];
+
+      /* CONTROL              POINT                       CONTROL      */
+bzVec = [                     [r0b_x1,r0b_y1],            SHARP(), // Top left
+     //    OFFSET([-25, -1]),   [73,4],                     SHARP(), // Top
+         POLAR(25, 140),      [r0b_x2,r0b_y1],           SHARP(), // Top right
+     //    POLAR(32, 153),      [r0b_x3+2,r0b_y3],          SHARP(), // Right
+         // Skip screw
+         SHARP(),             [r0b_x0, r0b_y0],  POLAR(82, 149), // Bottom right2
+       //  POLAR(18, 0),        [r0b_x0-41, r0b_y0-5],      POLAR(5, 180), // Bottom mid
+         SHARP(),             [r0b_x1, r0b_y0-5],         SHARP(),
+   //      SHARP(),             [r0b_x1, r0b_y1],
+    ];
+b1 = Bezier(bzVec, precision = bezier_precision);
+module rev0b_outer_profile() {
+    offset(r = 5, chamfer = false, $fn = 20) // Purposely slightly larger than the negative offset below
+    offset(r = -4.5, chamfer = false, $fn = 20)
+        polygon(b1);
+}
+module rev0b_top_case(raised = true) {
+    top_case(left_keys, rev0b_screw_holes, chamfer_height = raised ? 5 : 2.5, chamfer_width = 2.5, raised = raised) rev0b_outer_profile();
+
+}
+
+module rev0b_bottom_case() {
+    difference() {
+        bottom_case(rev0b_screw_holes, rev0b_tent_positions) rev0b_outer_profile();
+
+        translate([0, 0, wall_thickness + 0.01]) {
+            // Case holes for connectors etc. The second version of each is just
+            // For preview view
+
+            // keyboard cable
+            translate([60, 0, 0]) rotate([0, 0, 4]) {
+                micro_usb_hole();
+                %micro_usb_hole(hole = false);
+            }
+            
+
+        }
+    }
+}
+
+
+part = "top0b-raised";
+//part = "bottom0b";
+//part = "hrw";
+
+explode = 1;
+if (part == "outer") {
+    //BezierVisualize(bzVec);
+    offset(r = -2.5) // Where top of camber would come to
+        rev0b_outer_profile();
+    for (pos = rev0b_screw_holes) {
+        translate(pos) {
+            polyhole2d(r = 3.2 / 2);
+        }
+    }
+    #key_holes(left_keys);
+    
+} else if (part == "top0") {
+    rev0_top_case();
+
+} else if (part == "bottom0") {
+    rev0_bottom_case();
+
+} else if (part == "top0b-raised") {
+    rev0b_top_case(true);
+    
+} else if (part == "top0b") {
+    rev0b_top_case(false);
+
+} else if (part == "bottom0b") {
+    rev0b_bottom_case();
+
+} else if (part == "hrw") {
+    rev0b_top_case();
+    translate([0, 0, -bottom_case_height -30 * explode]) rev0b_bottom_case();
+
+} else if (part == "assembly") {
+    %translate([0, 0, plate_thickness + 30 * explode]) key_holes(left_keys, "keycap");
+    %translate([0, 0, plate_thickness + 20 * explode]) key_holes(left_keys, "switch");
+    rev0b_top_case();
+    translate([0, 0, -bottom_case_height -20 * explode]) rev0b_bottom_case();
+
+} else if (part == "holetest") {
+    * translate([-66.5, 20.25]) top_case([left_holes[0], left_holes[1], left_holes[7], left_holes[8]], [], raised = true)
+        translate([66.5, -20.25]) square([46, 49], center = true);
+    translate([-66.5, 20.25]) difference() {
+        chamfer_extrude(height = plate_thickness + top_case_raised_height, chamfer = 5, width = 2.5, faces = [false, true]) translate([66.5, -20.25]) square([46, 49], center = true);
+        translate([0, 0, 4])
+        key_holes([left_holes[0], left_holes[1], left_holes[7], left_holes[8]]);
+    }
+}
+
+
+// Requires my utility functions in your OpenSCAD lib or as local submodule
+// https://github.com/Lenbok/scad-lenbok-utils.git
+use<../Lenbok_Utils/utils.scad>
+// Requires bezier library from https://www.thingiverse.com/thing:2207518
+use<../Lenbok_Utils/bezier.scad>
+
+// for(y=[-150:10:10])color("lime")translate([100,y])cube([250,1,1],true);
+// for(x=[-20:10:220])color("red" )translate([x,-50])cube([1,250,1],true); 
