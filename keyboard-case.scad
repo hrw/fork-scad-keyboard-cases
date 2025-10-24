@@ -220,14 +220,25 @@ module top_plate(keys, screws) {
 }
 
 // children should be a 2d polygon specifying the outer border of case
-module top_case(keys, screws, raised = false, chamfer_height = 2.5, chamfer_width, chamfer_faces = true, tent_positions = [], standoffs = false) {
+module top_case(keys, screws, raised = false,
+                chamfer_height = 2.5, chamfer_width, chamfer_faces = true,
+                tent_positions = [],
+                standoffs = false) {
+
     screw_offset = 0;
     chamfer_w = chamfer_width == undef ? chamfer_height : chamfer_width;
     chamfer_f = chamfer_faces ? [false, true] : [false, false];
     total_depth = plate_thickness + (raised ? top_case_raised_height : 0);
     color(case_color) difference() {
         union() {
-            render() translate([0, 0, -depth_offset]) chamfer_extrude(height = total_depth + depth_offset, chamfer = chamfer_height, width = chamfer_w, faces = chamfer_f, $fn = 25) children();
+            render()
+                translate([0, 0, -depth_offset])
+                chamfer_extrude(height = total_depth + depth_offset,
+                                chamfer = chamfer_height,
+                                width = chamfer_w,
+                                faces = chamfer_f,
+                                $fn = 25) children();
+
             translate([0, 0, -depth_offset]) for(tent = tent_positions) {
                 height = len(tent) > 2 ? tent[2] : plate_thickness + depth_offset;
                 tent_support(tent[0], tent[1], height = height, lift = depth_offset + plate_thickness - height);
@@ -235,18 +246,27 @@ module top_case(keys, screws, raised = false, chamfer_height = 2.5, chamfer_widt
         }
 
         difference() {
-            render() translate([0, 0, -depth_offset - 0.1])
-                chamfer_extrude(height = depth_offset + 0.1, chamfer = chamfer_height * 0.7, width = chamfer_w * 0.7, faces = [false, false], $fn = 25)
-                offset(delta = -wall_thickness) children();
+            render()
+                translate([0, 0, -depth_offset - 0.1])
+                    chamfer_extrude(height = depth_offset + 0.1,
+                                    chamfer = chamfer_height * 0.7,
+                                    width = chamfer_w * 0.7,
+                                    faces = [false, false],
+                                    $fn = 25)
+                        offset(delta = -wall_thickness) children();
+
             if (standoffs) {
                 screw_positions(screws)
                     hull() {
-                    translate([0, 0, - depth_offset - 0.2]) polyhole(r = standoff_rad, h = 0.1);
-                    polyhole(r = standoff_rad, h = 0.1);
-                }
+                        translate([0, 0, -  total_depth - 0.2])
+                            polyhole(r = standoff_rad, h = 0.1);
+
+                        polyhole(r = standoff_rad, h = 0.1);
+                    }
             }
         }
-        translate([0, 0, plate_thickness + screw_offset]) screw_holes(screws);
+        translate([0, 0, plate_thickness - depth_offset + screw_offset])
+            screw_holes(screws, screw_depth = -4);
         translate([0, 0, plate_thickness]) key_holes(keys);
     }
 }
@@ -266,18 +286,27 @@ module bottom_case(screws, tent_positions = [], raised = false, chamfer_height =
                 tent_support(tent[0], tent[1], height = height, lift = lift);
             }
         }
-        
+
         difference() {
-            render() translate([0, 0, wall_thickness])
-                chamfer_extrude(height = wall_height, chamfer = chamfer_height * 0.7, width = chamfer_w * 0.7, faces = [true, false], $fn = 25)
-                offset(delta = -wall_thickness) children();
+            render()
+                translate([0, 0, wall_thickness])
+                    chamfer_extrude(height = wall_height,
+                                    chamfer = chamfer_height * 0.7,
+                                    width = chamfer_w * 0.7,
+                                    faces = [true, false],
+                                    $fn = 25)
+                        offset(delta = -wall_thickness) children();
+
             if (standoffs) {
                 standoff_height = bottom_case_height - depth_offset;
+
                 screw_positions(screws)
                     hull() {
-                    translate([0, 0, standoff_height]) polyhole(r = standoff_rad, h = 0.1);
-                    polyhole(r = standoff_rad + 1, h = 0.1);
-                }
+                        translate([0, 0, standoff_height])
+                            polyhole(r = standoff_rad, h = 0.1);
+
+                        polyhole(r = standoff_rad + 1, h = 0.1);
+                    }
             }
         }
 
@@ -295,4 +324,3 @@ module bottom_case(screws, tent_positions = [], raised = false, chamfer_height =
 // Requires my utility functions in your OpenSCAD lib or as local submodule
 // https://github.com/Lenbok/scad-lenbok-utils.git
 use<Lenbok_Utils/utils.scad>
-
