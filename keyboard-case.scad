@@ -168,9 +168,16 @@ module screw_positions(screws) {
     for (screw = screws) translate(screw) children();
 }
 
-module screw_holes(screws, screw_depth = 8, screw_head_depth = plate_thickness + top_case_raised_height) {
+module screw_holes(screws,
+                   screw_depth = 8,
+                   screw_head_depth = plate_thickness + top_case_raised_height) {
+
+    mirror = 0;
+    if (bottom_screws) {
+        mirror = 1;
+    }
     screw_positions(screws) {
-        mirror([0, 0, 1]) translate([0, 0, -screw_head_depth]) bolthole(r1=screw_head_rad, r2=screw_rad, h1=screw_head_depth, h2=screw_depth);
+        mirror([0, 0, mirror]) translate([0, 0, -screw_head_depth]) bolthole(r1=screw_head_rad, r2=screw_rad, h1=screw_head_depth, h2=screw_depth);
     }
 }
 
